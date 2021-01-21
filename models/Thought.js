@@ -29,4 +29,10 @@ const thoughtSchema = new Schema({
   },
 });
 
+thoughtSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    delete returnedObject.__v;
+  },
+});
+
 module.exports = model("Thought", thoughtSchema);

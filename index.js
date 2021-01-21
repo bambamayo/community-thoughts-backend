@@ -1,33 +1,9 @@
 require("dotenv").config();
-const { ApolloServer, gql } = require("apollo-server");
+const { ApolloServer } = require("apollo-server");
 const mongoose = require("mongoose");
 
-const Thought = require("./models/Thought");
-
-const typeDefs = gql`
-  type Thought {
-    id: ID!
-    body: String!
-    createdAt: String!
-    username: String!
-  }
-  type Query {
-    getThoughts: [Thought!]
-  }
-`;
-
-const resolvers = {
-  Query: {
-    async getThoughts() {
-      try {
-        const thoughts = await Thought.find();
-        return thoughts;
-      } catch (error) {
-        throw new Error(err);
-      }
-    },
-  },
-};
+const typeDefs = require("./graphql/typeDefs");
+const resolvers = require("./graphql/resolvers");
 
 const server = new ApolloServer({
   typeDefs,

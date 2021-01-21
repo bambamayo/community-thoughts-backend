@@ -9,6 +9,7 @@ module.exports = gql`
   }
   type Query {
     getThoughts: [Thought!]
+    getThought(thoughtId: ID!): Thought
   }
   type User {
     id: ID!
@@ -28,5 +29,7 @@ module.exports = gql`
   type Mutation {
     register(registerInput: RegisterInput): User!
     login(username: String!, password: String!): User!
+    createThought(body: String!): Thought!
+    deleteThought(thoughtId: ID!): String!
   }
 `;

@@ -1,4 +1,4 @@
-const { AuthenticationError } = require("apollo-server");
+const { UserInputError, AuthenticationError } = require("apollo-server");
 
 const Thought = require("../../models/Thought");
 const checkAuth = require("../../util/check-auth");
@@ -59,6 +59,78 @@ module.exports = {
         }
       } catch (error) {
         throw new Error(error);
+      }
+    },
+
+    async upvoteThought(_, { thoughtId }, context) {
+      const { username } = checkAuth(context);
+
+      const thought = await Thought.findById(thoughtId);
+      if (thought) {
+        if (
+          thought.downvotes.find((downvote) => downvote.username === username)
+        ) {
+          //If already downvoted, remove downvote and upvote
+          thought.downvotes = thought.downvotes.filter(
+            (downvote) => downvote.username !== username
+          );
+          thought.upvotes.push({
+            username,
+            createdAt: new Date().toISOString(),
+          });
+        } else if (
+          thought.upvotes.find((upvote) => upvote.username === username)
+        ) {
+          //if already upvoted, remove upvote
+          thought.upvotes = thought.upvotes.filter(
+            (upvote) => upvote.username !== username
+          );
+        } else {
+          //else add upvote
+          thought.upvotes.push({
+            username,
+            createdAt: new Date().toISOString(),
+          });
+        }
+
+        await thought.save();
+        return thought;
+      } else throw new UserInputError("Thought not found");
+    },
+
+    async downvoteThought(_, { thoughtId }, context) {
+      const { username } = checkAuth(context);
+
+      const thought = await Thought.findById(thoughtId);
+      if (thought) {
+        if (thought.upvotes.find((upvote) => upvote.username === username)) {
+          //If already upvoted, remove upvote and downvote
+          thought.upvotes = thought.upvotes.filter(
+            (upvote) => upvote.username !== username
+          );
+          thought.downvotes.push({
+            username,
+            createdAt: new Date().toISOString(),
+          });
+        } else if (
+          thought.downvotes.find((downvote) => downvote.username === username)
+        ) {
+          //if already downvoted, remove downvote
+          thought.downvotes = thought.downvotes.filter(
+            (downvote) => downvote.username !== username
+          );
+        } else {
+          //else add downvote
+          thought.downvotes.push({
+            username,
+            createdAt: new Date().toISOString(),
+          });
+        }
+
+        await thought.save();
+        return thought;
+      } else {
+        throw new UserInputError("Thought not found");
       }
     },
   },

@@ -32,7 +32,9 @@ module.exports = {
     async createThought(_, { body }, context) {
       const user = checkAuth(context);
 
-      console.log(user);
+      if (args.body.trim() === "") {
+        throw new Error("Thought body must not be empty");
+      }
 
       const newThought = new Thought({
         body,
